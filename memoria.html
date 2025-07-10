@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Jogo da Memória</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+    }
+
+    td {
+      width: 80px;
+      height: 80px;
+      border: 1px solid #ccc;
+      font-size: 40px;
+      background-color: #eee;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    td.revelado {
+      background-color: #fff;
+    }
+
+    td.acertou {
+      background-color: #c8e6c9;
+      cursor: default;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    #reiniciar {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #42a5f5;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #reiniciar:hover {
+      background-color: #1e88e5;
+    }
+  </style>
+</head>
+<body>
+
+<h2>🐾 Jogo da Memória – Animais</h2>
+<table id="tabuleiro"></table>
+<div id="status">Pontos: 0</div>
+<button id="reiniciar" onclick="iniciarJogo()">🔁 Reiniciar</button>
+
+<script>
+  const emojis = ['🐶','🐱','🦁','🐯','🦊','🐸','🐵','🐷'];
+  let cartas = [];
+  let selecionadas = [];
+  let pontos = 0;
+  let travado = false;
+
+  function iniciarJogo() {
+    const tabuleiro = document.getElementById('tabuleiro');
+    const status = document.getElementById('status');
+    pontos = 0;
+    status.innerText = "Pontos: 0";
+    cartas = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+    tabuleiro.innerHTML = '';
+    travado = false;
+    selecionadas = [];
+
+    for (let i = 0; i < 4; i++) {
+      const linha = document.createElement('tr');
+      for (let j = 0; j < 4; j++) {
+        const idx = i * 4 + j;
+        const td = document.createElement('td');
+        td.dataset.valor = cartas[idx];
+        td.onclick = () => revelar(td);
+        linha.appendChild(td);
+      }
+      tabuleiro.appendChild(linha);
+    }
+  }
+
+  function revelar(td) {
+    if (travado || td.classList.contains('acertou') || td.classList.contains('revelado')) return;
+
+    td.textContent = td.dataset.valor;
+    td.classList.add('revelado');
+    selecionadas.push(td);
+
+    if (selecionadas.length === 2) {
+      travado = true;
+      const [a, b] = selecionadas;
+      if (a.dataset.valor === b.dataset.valor) {
+        a.classList.add('acertou');
+        b.classList.add('acertou');
+        pontos++;
+        document.getElementById('status').innerText = `Pontos: ${pontos}`;
+        selecionadas = [];
+        travado = false;
+
+        if (document.querySelectorAll('.acertou').length === 16) {
+          document.getElementById('status').innerText = `🎉 Você venceu com ${pontos} pontos!`;
+        }
+
+      } else {
+        setTimeout(() => {
+          a.textContent = '';
+          b.textContent = '';
+          a.classList.remove('revelado');
+          b.classList.remove('revelado');
+          selecionadas = [];
+          travado = false;
+        }, 1000);
+      }
+    }
+  }
+
+  iniciarJogo();
+</script>
+
+</body>
+</html>

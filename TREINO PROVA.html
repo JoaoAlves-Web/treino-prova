@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Loja Mágica</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 10px;
+      text-align: center;
+    }
+    .acima-media {
+      background-color: #e1f5fe;
+    }
+    .mais-caro {
+      background-color: #ffe082;
+      font-weight: bold;
+    }
+    .mais-barato {
+      background-color: #c8e6c9;
+      font-weight: bold;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1976d2;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Catálogo da Loja Mágica 🧙‍♂️</h2>
+<p id="resultado">Carregando produtos...</p>
+<button onclick="carregarProdutos()">🔁 Tentar novamente</button>
+
+<script>
+  function fetchProdutosFake() {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const numero = Math.floor(Math.random() * 100);
+        console.log("Número gerado:", numero);
+
+        if (numero % 2 === 0) {
+          resolve({
+            status: 200,
+            json: () => Promise.resolve([
+              { id: 1, nome: "Capa Invisível", tipo: "Mágico", preco: 500 },
+              { id: 2, nome: "Varinha de Carvalho", tipo: "Mágico", preco: 320 },
+              { id: 3, nome: "Poção de Cura", tipo: "Alquimia", preco: 100 },
+              { id: 4, nome: "Bola de Cristal", tipo: "Oráculo", preco: 250 },
+              { id: 5, nome: "Bastão de Fogo", tipo: "Mágico", preco: 670 },
+              { id: 6, nome: "Livro Antigo", tipo: "Artefato", preco: 210 },
+              { id: 7, nome: "Espelho da Verdade", tipo: "Oráculo", preco: 400 },
+              { id: 8, nome: "Lâmpada Mística", tipo: "Relíquia", preco: 90 },
+              { id: 9, nome: "Pó de Fada", tipo: "Ingrediente", preco: 150 },
+              { id: 10, nome: "Ampulheta do Tempo", tipo: "Relíquia", preco: 800 }
+            ])
+          });
+        } else {
+          reject({ res: "ERROR", msg: "ERRO NO SISTEMA" });
+        }
+      }, 4000);
+    });
+  }
+
+  async function carregarProdutos() {
+    const divResultado = document.getElementById('resultado');
+    divResultado.innerHTML = "Carregando produtos...";
+
+    try {
+      const resposta = await fetchProdutosFake();
+      const produtos = await resposta.json();
+
+      const tabela = document.createElement('table');
+      const cabecalho = `
+        <tr>
+          <th>ID</th><th>Nome</th><th>Tipo</th><th>Preço (R$)</th>
+        </tr>`;
+      tabela.innerHTML = cabecalho;
+
+      const precos = produtos.map(p => p.preco);
+      const media = precos.reduce((soma, v) => soma + v, 0) / precos.length;
+      const max = Math.max(...precos);
+      const min = Math.min(...precos);
+
+      produtos.forEach(p => {
+        const tr = document.createElement('tr');
+        if (p.preco === max) tr.classList.add('mais-caro');
+        else if (p.preco === min) tr.classList.add('mais-barato');
+        else if (p.preco > media) tr.classList.add('acima-media');
+
+        tr.innerHTML = `<td>${p.id}</td><td>${p.nome}</td><td>${p.tipo}</td><td>${p.preco}</td>`;
+        tabela.appendChild(tr);
+      });
+
+      divResultado.innerHTML = `<p>Média de preço: R$ ${media.toFixed(2)}</p>`;
+      divResultado.appendChild(tabela);
+    } catch (erro) {
+      divResultado.innerHTML = `<p style="color:red;">${erro.msg}</p>`;
+    }
+  }
+
+  carregarProdutos(); // Carrega ao abrir a página
+</script>
+
+</body>
+</html>
